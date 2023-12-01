@@ -15,6 +15,7 @@
 package org.testKitGen;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -398,10 +399,12 @@ public class TestInfoParser {
 	}
 
 	private boolean checkPlatformReq(List<String> platformRequirementsList) {
+		System.out.println("Checking platform requirements: " + platformRequirementsList);
 		if (platformRequirementsList.isEmpty()) {
 			return true;
 		}
 		for (String prs : platformRequirementsList) {
+			System.out.println("Processing platform requirement set: " + prs);
 			boolean isValid = true;
 			for (String pr : prs.split("\\s*,\\s*")) {
 				pr = pr.trim();
@@ -410,9 +413,10 @@ public class TestInfoParser {
 					pr = pr.substring(1);
 					notPrefix = true;
 				}
+				System.out.println("Modified platform requirement (pr): " + pr);
 				String spec = arg.getSpec();
 				String fullSpec = spec;
-
+				System.out.println("FullSpec being compared: " + fullSpec);
 				// Special case 32/31-bit specs which do not have 32 or 31 in the name (i.e.
 				// aix_ppc)
 				if (!spec.contains("-64")) {
@@ -424,6 +428,7 @@ public class TestInfoParser {
 				}
 
 				boolean isMatch = matchPlat(fullSpec, pr);
+				System.out.println("Matching result for " + pr + ": " + isMatch);
 				if ((notPrefix && isMatch) || (!notPrefix && !isMatch)) {
 					isValid = false;
 					break;
@@ -436,20 +441,107 @@ public class TestInfoParser {
 		return false;
 	}
 
+	private boolean matchPlat1(String fullSpec, String pr) {
+		String[] prSplitOnDot = pr.split("\\.");
+
+		if (!fullSpec.contains(prSplitOnDot[1])) {
+			return false;
+		}
+		System.out.println("microArch for checkplatformReq:" + Arrays.toString(prSplitOnDot) + " environmentMicroArch:" + arg.getMicroArch());
+
+		if (prSplitOnDot[0].equals("arch") && (prSplitOnDot.length == 3)) {
+			String microArchVersion = prSplitOnDot[2];
+			String environmentMicroArch = arg.getMicroArch();
+			System.out.println("microArchVersion from pr:" + microArchVersion + " environmentMicroArch:" + environmentMicroArch);
+			if (!microArchVersion.startsWith("z")){
+				return false;
+			}
+			if (microArchVersion.endsWith("+")) {
+				int microArchVersionInt=0;
+				int environmentMicroArchVerInt=0;
+				try {
+					microArchVersionInt = Integer.parseInt(microArchVersion.substring(1, microArchVersion.length() - 1));
+					System.out.println("pr number as microArchVersion : " + microArchVersionInt);
+
+					environmentMicroArchVerInt = Integer.parseInt(environmentMicroArch.substring(1, microArchVersion.length()-1));
+					System.out.println("Extracted number as integer from microArch: " + environmentMicroArchVerInt);
+				} catch (NumberFormatException e) {
+					System.err.println(e.getMessage());
+					return false;
+				}
+				if (microArchVersionInt > environmentMicroArchVerInt)
+				{
+					return false;
+				}
+			} else {
+					if(!environmentMicroArch.equals(microArchVersion)){
+						return false;
+					}
+			}
+		} else if (prSplitOnDot[0].equals("os") && (prSplitOnDot.length == 4)) {
+			String osName = prSplitOnDot[2];
+			if (arg.getOsLabel().isEmpty()) {
+				return false;
+			}
+
+			String[] osLabelArg = arg.getOsLabel().split("\\.");
+			if (!osLabelArg[0].equals(osName)) {
+				return false;
+			}
+
+			String osVersion = prSplitOnDot[3];
+			if (osVersion.endsWith("+")) {
+				int verInt = 0;
+				try {
+					verInt = Integer.parseInt(osVersion.substring(0, osVersion.length() - 1));
+				} catch (NumberFormatException e) {
+					System.out.println("Error: unrecognized platformRequirement: " + Arrays.toString(prSplitOnDot) + ". Only support integer OS version.");
+					return false; // Adjusted to return false instead of System.exit(1);
+				}
+
+				int argVerInt = 0;
+				try {
+					argVerInt = Integer.parseInt(osLabelArg[1]);
+				} catch (NumberFormatException e) {
+					System.out.println("Error: unrecognized osLabel: " + arg.getOsLabel() + ". Only support integer OS version.");
+					return false; // Adjusted to return false instead of System.exit(1);
+				}
+				return verInt <= argVerInt;
+			} else {
+				return osLabelArg[1].equals(osVersion);
+			}
+		}
+		return true;
+	}
+
+
+	private int extractVersionNumber(String input, String context) throws NumberFormatException {
+		Pattern pattern = Pattern.compile("\\d+");
+		Matcher matcher = pattern.matcher(input);
+		if (matcher.find()) {
+			try {
+				return Integer.parseInt(matcher.group());
+			} catch (NumberFormatException e) {
+				throw new NumberFormatException("Error parsing version number from " + context + ": " + input);
+			}
+		} else {
+			throw new NumberFormatException("No numeric version found in " + context + ": " + input);
+		}
+	}
+
 	private boolean matchPlat(String fullSpec, String pr) {
 		String[] prSplitOnDot = pr.split("\\.");
 
 		if (!fullSpec.contains(prSplitOnDot[1])) {
 			return false;
 		}
-
 		if (prSplitOnDot[0].equals("arch") && (prSplitOnDot.length == 3)) {
-			String microArch = prSplitOnDot[2];
-			if (!microArch.equals(arg.getMicroArch())) {
-				return false;
-			}
+			String requiredMicroArch = prSplitOnDot[2];
+			String actualMicroArch = arg.getMicroArch();
+			return compareVersion(requiredMicroArch, actualMicroArch);
 		} else if (prSplitOnDot[0].equals("os") && (prSplitOnDot.length == 4)) {
 			String osName = prSplitOnDot[2];
+			String osVersion = prSplitOnDot[3];
 			if (arg.getOsLabel().isEmpty()) {
 				return false;
 			}
@@ -457,31 +549,74 @@ public class TestInfoParser {
 			if (!osLabelArg[0].equals(osName)) {
 				return false;
 			}
-			String osVersion = prSplitOnDot[3];
-			if (osVersion.endsWith("+")) {
-				int verInt = 0;
-				try {
-					verInt = Integer.parseInt(osVersion.substring(0, osVersion.length() - 1));
-				} catch (NumberFormatException e) {
-					System.out.println("Error: unrecognized platformRequirement: " + prSplitOnDot + ". Only support integer OS version.");
-					System.exit(1);
-				}
-				int argVerInt = 0;
-				try {
-					argVerInt = Integer.parseInt(osLabelArg[1]);
-				} catch (NumberFormatException e) {
-					System.out.println("Error: unrecognized osLabel: " + arg.getOsLabel() + ". Only support integer OS version.");
-					System.exit(1);
-				}
-				if (verInt > argVerInt) {
-					return false;
-				}
-			} else {
-				if (!osLabelArg[1].equals(osVersion)) {
-					return false;
-				}
-			}
+			return compareVersion(osVersion, osLabelArg[1]);
 		}
 		return true;
 	}
+
+	private boolean compareVersion(String requiredLabel, String actualLabel) {
+		if (requiredLabel.isEmpty() || actualLabel.isEmpty()) {
+			return false;
+		} else if (requiredLabel == actualLabel) {
+			return true;
+		} else if (requiredLabel.endsWith("+")) {
+			Pattern pattern = Pattern.compile("(\\D+)?(\\d+)");
+			Matcher requiredLabelMatcher = pattern.matcher(requiredLabel);
+			Matcher actualLabelMatcher = pattern.matcher(actualLabel);
+
+		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
+			if (requiredLabelMatcher.group(1) == actualLabelMatcher.group(1)) {
+			  int requiredLabelNum = 0;
+			  int actualLabelNum = 0;
+			  try {
+				requiredLabelNum = Integer.parseInt(requiredLabelMatcher.group(2));
+				actualLabelNum = Integer.parseInt(actualLabelMatcher.group(2));
+			  } catch (NumberFormatException e) {
+				System.out.println("Error: unrecognized requiredLabel:" + requiredLabel + " or actualLabel:" + actualLabel);
+				System.err.println(e.getMessage());
+				System.exit(1);
+			  }
+			  if (actualLabelNum >= requiredLabelNum) {
+				   return true;
+				}
+			}
+		  }
+		}
+		return false;
+	  }
+
+	private boolean isVersionCompare(String prVersion, String environmentVersion) {
+		Pattern pattern = Pattern.compile("\\d+");
+    	Matcher prMatcher = pattern.matcher(prVersion);
+    	Matcher envMatcher = pattern.matcher(environmentVersion);
+
+    	int prVersionNumber = 0;
+    	int environmentVersionNumber = 0;
+		try {
+			if (prMatcher.find()) {
+				String prVersionNum = prVersion.endsWith("+") ? prMatcher.group() : prMatcher.group().substring(0, prMatcher.group().length());
+				prVersionNumber = Integer.parseInt(prVersionNum);
+				System.out.println("Debug: Extracted pr version number: " + prVersionNumber);
+			}
+			if (envMatcher.find()) {
+				environmentVersionNumber = Integer.parseInt(envMatcher.group().substring(0, envMatcher.group().length()));
+				System.out.println("Debug: Extracted detected environmentVersionNumber: " + environmentVersionNumber);
+			}
+		} catch (NumberFormatException e) {
+			System.err.println("Version comparison error: " + e.getMessage());
+			return false;
+		}
+		boolean comparisonResult = prVersionNumber > environmentVersionNumber;
+    	System.out.println("Debug: Required version (" + prVersionNumber + ") > Environment version (" + environmentVersionNumber + ")? : " + comparisonResult);
+
+		if (prVersionNumber > environmentVersionNumber) {
+			return false;
+		}
+		else {
+			return true;
+		}
+
+	}
+
+
 }
