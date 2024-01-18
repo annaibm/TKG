@@ -2,6 +2,7 @@ name: "Run TKG Tests"
 on:
   issue_comment:
     types: [created]
+  workflow_dispatch:
 jobs:
   testTKG:
     runs-on: ubuntu-latest
