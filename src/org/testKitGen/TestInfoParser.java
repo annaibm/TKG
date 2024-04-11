@@ -556,8 +556,10 @@ public class TestInfoParser {
 
 	private boolean compareVersion(String requiredLabel, String actualLabel) {
 		if (requiredLabel.isEmpty() || actualLabel.isEmpty()) {
+			System.out.println("Debug - compareVersion: One or both labels are empty");
 			return false;
-		} else if (requiredLabel == actualLabel) {
+		} else if (requiredLabel.equals(actualLabel)) {
+			System.out.println("Debug - compareVersion:labels equals");
 			return true;
 		} else if (requiredLabel.endsWith("+")) {
 			Pattern pattern = Pattern.compile("(\\D+)?(\\d+)");
@@ -565,12 +567,14 @@ public class TestInfoParser {
 			Matcher actualLabelMatcher = pattern.matcher(actualLabel);
 
 		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
-			if (requiredLabelMatcher.group(1) == actualLabelMatcher.group(1)) {
+			if (requiredLabelMatcher.group(1).equals(actualLabelMatcher.group(1))) {
 			  int requiredLabelNum = 0;
 			  int actualLabelNum = 0;
 			  try {
 				requiredLabelNum = Integer.parseInt(requiredLabelMatcher.group(2));
+				System.out.println("Debug - requiredLabelNum:"+requiredLabelNum);
 				actualLabelNum = Integer.parseInt(actualLabelMatcher.group(2));
+				System.out.println("Debug - actualLabelNum:"+actualLabelNum);
 			  } catch (NumberFormatException e) {
 				System.out.println("Error: unrecognized requiredLabel:" + requiredLabel + " or actualLabel:" + actualLabel);
 				System.err.println(e.getMessage());
