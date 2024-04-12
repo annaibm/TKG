@@ -549,7 +549,7 @@ public class TestInfoParser {
 			if (!osLabelArg[0].equals(osName)) {
 				return false;
 			}
-			System.out.println("Debug - compareVersion: osVersion and sLabelArg[1] labels are:" + osVersion + " :" + osLabelArg[1] );
+			System.out.println("Debug - compareVersion: osVersion and osLabelArg[1] labels are:" + osVersion + " :" + osLabelArg[1] );
 			return compareVersion(osVersion, osLabelArg[1]);
 		}
 		return true;
@@ -570,8 +570,9 @@ public class TestInfoParser {
 		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
 			System.out.println("Debug - compareVersion:labels equals:"+ requiredLabelMatcher.group(1)+ "required:  " + requiredLabelMatcher.groupCount());
 			System.out.println("Debug - compareVersion:labels equals:"+ actualLabelMatcher.group(1)+ "required:  " + actualLabelMatcher.groupCount());
-
-			if (requiredLabelMatcher.group(1).equals(actualLabelMatcher.group(1))) {
+			String requiredPrefix = requiredLabelMatcher.group(1) != null ? requiredLabelMatcher.group(1) : "";
+       		String actualPrefix = actualLabelMatcher.group(1) != null ? actualLabelMatcher.group(1) : "";
+			if (requiredPrefix.equals(actualPrefix)) {
 			  int requiredLabelNum = 0;
 			  int actualLabelNum = 0;
 			  try {
