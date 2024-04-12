@@ -566,10 +566,11 @@ public class TestInfoParser {
 			Pattern pattern = Pattern.compile("(\\D+)?(\\d+)");
 			Matcher requiredLabelMatcher = pattern.matcher(requiredLabel);
 			Matcher actualLabelMatcher = pattern.matcher(actualLabel);
+
+		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
 			System.out.println("Debug - compareVersion:labels equals:"+ requiredLabelMatcher.group(1)+ "required:  " + requiredLabelMatcher.groupCount());
 			System.out.println("Debug - compareVersion:labels equals:"+ actualLabelMatcher.group(1)+ "required:  " + actualLabelMatcher.groupCount());
 
-		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
 			if (requiredLabelMatcher.group(1).equals(actualLabelMatcher.group(1))) {
 			  int requiredLabelNum = 0;
 			  int actualLabelNum = 0;
@@ -600,7 +601,7 @@ public class TestInfoParser {
     	int prVersionNumber = 0;
     	int environmentVersionNumber = 0;
 		try {
-			if (prMatcher.find()) {
+			if (prMatcher.find()) {`
 				String prVersionNum = prVersion.endsWith("+") ? prMatcher.group() : prMatcher.group().substring(0, prMatcher.group().length());
 				prVersionNumber = Integer.parseInt(prVersionNum);
 				System.out.println("Debug: Extracted pr version number: " + prVersionNumber);
