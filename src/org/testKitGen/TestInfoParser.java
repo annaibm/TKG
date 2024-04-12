@@ -549,6 +549,7 @@ public class TestInfoParser {
 			if (!osLabelArg[0].equals(osName)) {
 				return false;
 			}
+			System.out.println("Debug - compareVersion: osVersion and sLabelArg[1] labels are:" + osVersion + " :" + osLabelArg[1] );
 			return compareVersion(osVersion, osLabelArg[1]);
 		}
 		return true;
@@ -565,6 +566,8 @@ public class TestInfoParser {
 			Pattern pattern = Pattern.compile("(\\D+)?(\\d+)");
 			Matcher requiredLabelMatcher = pattern.matcher(requiredLabel);
 			Matcher actualLabelMatcher = pattern.matcher(actualLabel);
+			System.out.println("Debug - compareVersion:labels equals:"+ requiredLabelMatcher.group(1)+ "required:  " + requiredLabelMatcher.groupCount());
+			System.out.println("Debug - compareVersion:labels equals:"+ actualLabelMatcher.group(1)+ "required:  " + actualLabelMatcher.groupCount());
 
 		  if (requiredLabelMatcher.find() && actualLabelMatcher.find() && requiredLabelMatcher.groupCount() == 2 && actualLabelMatcher.groupCount() == 2) {
 			if (requiredLabelMatcher.group(1).equals(actualLabelMatcher.group(1))) {
