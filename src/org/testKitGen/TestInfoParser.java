@@ -601,7 +601,7 @@ public class TestInfoParser {
     	int prVersionNumber = 0;
     	int environmentVersionNumber = 0;
 		try {
-			if (prMatcher.find()) {`
+			if (prMatcher.find()) {
 				String prVersionNum = prVersion.endsWith("+") ? prMatcher.group() : prMatcher.group().substring(0, prMatcher.group().length());
 				prVersionNumber = Integer.parseInt(prVersionNum);
 				System.out.println("Debug: Extracted pr version number: " + prVersionNumber);
