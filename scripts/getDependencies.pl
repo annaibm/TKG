@@ -286,7 +286,7 @@ my %jars_to_use = $path =~ /system_lib/ ? %system_jars : %base;
 my @jars_info;
 foreach my $dependency (keys %jars_to_use) {
 	foreach my $i (@dependencies) {
-		if ($i eq "all" || exists $jars_to_use{$dependency}) {
+		if ($i eq "all" || e$dependency eq $i) {
 			push(@jars_info, $jars_to_use{$dependency});
 		}
 	}
