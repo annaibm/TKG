@@ -280,7 +280,7 @@ my %system_jars = (
 
 my %jars_to_use = $path =~ /system_lib/ ? %system_jars : %base;
 my @dependencies = split(',', $dependencyList);
-print "Dependency list: @dependencies"
+print "Dependency list: @dependencies";
 # Put all dependent jars hash to array to prepare downloading
 my @jars_info;
 foreach my $dependency (keys %jars_to_use) {
