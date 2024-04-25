@@ -278,15 +278,14 @@ my %system_jars = (
 		sha1 => '6f3219b1f8b346380664c525bf97018fc1420159'
 	});
 
-my @dependencies = split(',', $dependencyList);
-
-# Put all dependent jars hash to array to prepare downloading
 my %jars_to_use = $path =~ /system_lib/ ? %system_jars : %base;
-
+my @dependencies = split(',', $dependencyList);
+print "Dependency list: @dependencies"
+# Put all dependent jars hash to array to prepare downloading
 my @jars_info;
 foreach my $dependency (keys %jars_to_use) {
 	foreach my $i (@dependencies) {
-		{
+		if ($i eq "all" || $dependency eq $i) {
 			push(@jars_info, $jars_to_use{$dependency});
 		}
 	}
