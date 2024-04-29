@@ -285,9 +285,7 @@ print "Dependency list: @dependencies";
 my @jars_info;
 foreach my $dependency (keys %jars_to_use) {
 	foreach my $i (@dependencies) {
-		if ($i eq "all" || $dependency eq $i) {
 			push(@jars_info, $jars_to_use{$dependency});
-		}
 	}
 }
 
