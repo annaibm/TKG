@@ -332,7 +332,7 @@ if ($task eq "clean") {
 			$sha->addfile($filename);
 			$digest = $sha->hexdigest;
 		}
-        print "URL used is...$url\n"
+        print "URL used is...$url\n";
 		my $expectedsha = $jars_info[$i]{sha1};
 		if (!$expectedsha) {
 			$shafn = $path . $sep . $shafn;
