@@ -329,6 +329,7 @@ if ($task eq "clean") {
             if ($jars_info[$i]{is_system_test}) {
                 $url_custom =~ s/test.getDependency/systemtest.getDependency/;
                 $url_custom .= "systemtest_prereqs/";
+                $url_custom .= $jars_info[$i]{dir};
             }
             print "Custom url changed to: $url_custom\n";
 			$url = "$url_custom/$fn";
