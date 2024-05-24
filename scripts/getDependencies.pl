@@ -328,6 +328,7 @@ if ($task eq "clean") {
 		if ($url_custom ne "") {
             if ($jars_info[$i]{is_system_test}) {
                 $url_custom =~ s/test.getDependency/systemtest.getDependency/;
+                $url_custom .= "systemtest_prereqs/";
             }
             print "Custom url changed to: $url_custom\n";
 			$url = "$url_custom/$fn";
@@ -393,9 +394,6 @@ if ($task eq "clean") {
 			$digest = $sha->hexdigest;
 
 			if ($digest ne $expectedsha) {
-                $url = $jars_info[$i]{url};
-                print "Retrying: Downloading with url: $url \n";
-                downloadFile($url,$filename);
 				print "Expected sha is: $expectedsha,\n";
 				print "Actual sha is  : $digest.\n";
 				print "Please delete $filename and rerun the program!";
