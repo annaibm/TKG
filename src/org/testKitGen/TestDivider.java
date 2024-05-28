@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.FileReader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -73,13 +74,13 @@ public class TestDivider {
 				if (testDuration < limitFactor) {
 					Map.Entry<Integer,Integer> entry = new AbstractMap.SimpleEntry<>(index, testDuration);
 					machineQueue.offer(entry);
-				} else { 
+				} else {
 					/* If the test time is greater than the limiting factor, set it as the new limiting factor. */
 					limitFactor = testDuration;
 					System.out.println("Warning: Test " + testName + " has duration " + formatTime(testDuration) + ", which is greater than the specified test list execution time " + testTime + "m. So this value is used to limit the overall execution time.");
 				}
 				index++;
-				
+
 			}
 		}
 	}
@@ -107,19 +108,19 @@ public class TestDivider {
 	}
 
 	private String constructURL(String impl, String plat, String group, String level) {
-		int limit = 10; // limit the number of builds used to calculate the average duration 
+		int limit = 10; // limit the number of builds used to calculate the average duration
 		String URL = (arg.getTRSSURL().isEmpty() ? Constants.TRSS_URL : arg.getTRSSURL()) + "/api/getTestAvgDuration?limit=" + limit + "&jdkVersion=" + arg.getJdkVersion() + "&impl=" + impl + "&platform=" + plat;
 
 		if (tt.isSingleTest()) {
 			URL += "&testName=" + tt.getTestTargetName();
 		} else if (tt.isCategory()) {
 			if (!group.equals("")) {
-				URL += "&group=" + group; 
+				URL += "&group=" + group;
 			}
 			if (!level.equals("")) {
-				URL += "&level=" + level; 
+				URL += "&level=" + level;
 			}
-		} 
+		}
 		return URL;
 	}
 
@@ -226,21 +227,35 @@ public class TestDivider {
 		String level = getLevel();
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		String URL = constructURL(impl, plat, group, level);
-		String command = "curl --silent --max-time 120 " + URL;
+		String command = "curl --silent --max-time 120 -L " + URL;
 		System.out.println("Attempting to get test duration data from TRSS.");
 		System.out.println(command);
-		Process process;
 		try {
-			process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec(command);
+			try (InputStream responseStream = process.getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream))) {
+				String line;
+				StringBuilder responseBuilder = new StringBuilder();
+				while ((line = reader.readLine()) != null) {
+					responseBuilder.append(line);
+				}
+				String responseData = responseBuilder.toString();
+				if (!responseData.isEmpty()) {
+					try (Reader stringReader = new StringReader(responseData)) {
+					parseDuration(stringReader, map);
+					map.forEach((key, value) -> System.out.println("Test ID: " + key + ", Average Duration: " + value));
+					} catch (ParseException e) {
+						System.out.println("Error parsing the data: " + e.getMessage());
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println("No data received from TRSS.");
+				}
+			}
 		} catch (IOException e) {
-			System.out.println("Warning: cannot get data from TRSS.");
+			System.out.println("Error executing curl command or reading input: " + e.getMessage());
+			e.printStackTrace();
 			return map;
-		}
-		try	(InputStream responseStream = process.getInputStream();
-			Reader responseReader = new BufferedReader(new InputStreamReader(responseStream))) {
-			parseDuration(responseReader, map);
-		} catch (IOException | ParseException e) {
-			System.out.println("Warning: cannot parse data from TRSS.");
 		}
 		return map;
 	}
@@ -294,7 +309,7 @@ public class TestDivider {
 			}
 		}
 
-		System.out.println("\nTEST DURATION");	
+		System.out.println("\nTEST DURATION");
 		System.out.println("====================================================================================");
 		System.out.println("Total number of tests searched: " + numOfTests);
 		int foundNum = numOfTests - testsNotFound.size() - testsInvalid.size();
