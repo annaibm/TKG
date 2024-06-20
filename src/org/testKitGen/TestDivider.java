@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.FileReader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -229,19 +230,32 @@ public class TestDivider {
 		String command = "curl --silent --max-time 120 -L " + URL;
 		System.out.println("Attempting to get test duration data from TRSS.");
 		System.out.println(command);
-		Process process;
 		try {
-			process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec(command);
+			try (InputStream responseStream = process.getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream))) {
+				String line;
+				StringBuilder responseBuilder = new StringBuilder();
+				while ((line = reader.readLine()) != null) {
+					responseBuilder.append(line);
+				}
+				String responseData = responseBuilder.toString();
+				if (!responseData.isEmpty()) {
+					try (Reader stringReader = new StringReader(responseData)) {
+					parseDuration(stringReader, map);
+					map.forEach((key, value) -> System.out.println("Test ID: " + key + ", Average Duration: " + value));
+					} catch (ParseException e) {
+						System.out.println("Error parsing the data: " + e.getMessage());
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println("No data received from TRSS.");
+				}
+			}
 		} catch (IOException e) {
-			System.out.println("Warning: cannot get data from TRSS.");
-			return map;
-		}
-		try	(InputStream responseStream = process.getInputStream();
-			Reader responseReader = new BufferedReader(new InputStreamReader(responseStream))) {
-			parseDuration(responseReader, map);
-		} catch (IOException | ParseException e) {
-			System.out.println("Warning: cannot parse data from TRSS.");
+			System.out.println("Error executing curl command or reading input: " + e.getMessage());
 			e.printStackTrace();
+			return map;
 		}
 		return map;
 	}
