@@ -233,28 +233,28 @@ public class TestDivider {
 		try {
 			Process process = Runtime.getRuntime().exec(command);
 			try (InputStream responseStream = process.getInputStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream))) {
-				String line;
-				StringBuilder responseBuilder = new StringBuilder();
-				while ((line = reader.readLine()) != null) {
-					responseBuilder.append(line);
-				}
-				String responseData = responseBuilder.toString();
-				if (!responseData.isEmpty()) {
-					try (Reader stringReader = new StringReader(responseData)) {
-					parseDuration(stringReader, map);
-					map.forEach((key, value) -> System.out.println("Test ID: " + key + ", Average Duration: " + value));
-					} catch (ParseException e) {
-						System.out.println("Error parsing the data: " + e.getMessage());
-						e.printStackTrace();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream))) {
+					String line;
+					StringBuilder responseBuilder = new StringBuilder();
+					while ((line = reader.readLine()) != null) {
+							responseBuilder.append(line);
 					}
-				} else {
-					System.out.println("No data received from TRSS.");
-				}
+					String responseData = responseBuilder.toString();
+					if (!responseData.isEmpty()) {
+							try (Reader stringReader = new StringReader(responseData)) {
+							parseDuration(stringReader, map);
+							map.forEach((key, value) -> System.out.println("Test ID: " + key + ", Average Duration: " + value));
+							} catch (ParseException e) {
+									System.out.println("Error parsing the data: " + e.getMessage());
+									e.printStackTrace();
+							}
+					} else {
+							System.out.println("No data received from TRSS.");
+					}
 			}
 		} catch (IOException e) {
-			System.out.println("Error executing curl command or reading input: " + e.getMessage());
-			e.printStackTrace();
+				System.out.println("Error executing curl command or reading input: " + e.getMessage());
+				e.printStackTrace();
 			return map;
 		}
 		return map;
