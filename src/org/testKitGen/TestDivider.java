@@ -290,7 +290,15 @@ public class TestDivider {
 		Map<String, Integer> testsInvalid = new HashMap<>();
 		for (String test : allTests) {
 			if (matchTRSS.contains(test) || matchCache.contains(test)) {
-				int duration = TRSSMap.containsKey(test) ? TRSSMap.get(test) : cacheMap.get(test);
+				int duration;
+        		if (TRSSMap.containsKey(test)) {
+            		duration = TRSSMap.get(test);
+            		System.out.println("TRSSMap.get(" + test + "): " + duration);
+        		} else {
+            		duration = cacheMap.get(test);
+            		System.out.println("cacheMap.get(" + test + "): " + duration);
+        		}
+				// int duration = TRSSMap.containsKey(test) ? TRSSMap.get(test) : cacheMap.get(test);
 				if (duration > 0) {
 					durationQueue.offer(new AbstractMap.SimpleEntry<>(test, duration));
 				} else {
