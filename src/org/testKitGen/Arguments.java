@@ -189,6 +189,7 @@ public class Arguments {
 			Properties platProp = new Properties();
 			platProp.load(platReader);
 			plat = platProp.getProperty(spec);
+			System.out.println("Platform printed here:"+ plat);
 			if (plat == null) {
 				System.err.println("Error: Please update file " + Constants.BUILDPLAT_JSON + "! Add entry for " + spec + ".");
 				System.exit(1);
