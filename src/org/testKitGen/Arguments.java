@@ -189,6 +189,7 @@ public class Arguments {
 			Properties platProp = new Properties();
 			platProp.load(platReader);
 			plat = platProp.getProperty(spec);
+			System.out.println("Spec provided is  printed here:"+ spec);
 			System.out.println("Platform printed here:"+ plat);
 			if (plat == null) {
 				System.err.println("Error: Please update file " + Constants.BUILDPLAT_JSON + "! Add entry for " + spec + ".");
@@ -222,6 +223,7 @@ public class Arguments {
 				}
 			} else if (arglc.startsWith("--spec=")) {
 				spec = arglc.substring(arg.indexOf("=") + 1);
+				System.out.print("Spec in arguments: " + spec);
 				plat = spec2Plat(spec);
 			} else if (arglc.startsWith("--microarch=")) {
 				microArch = arglc.substring(arg.indexOf("=") + 1);
