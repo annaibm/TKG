@@ -81,7 +81,7 @@ public class JavaInfo {
             spec = spec.replace("arm-64", "aarch64");
             spec = spec.replace("riscv-64", "riscv64");
             spec = spec.replace("loongarch-64", "loongarch64");
-            if (javaImplInfo.equals("ibm") || javaImplInfo.equals("openj9")) {
+            if ((javaImplInfo.equals("ibm") || javaImplInfo.equals("openj9")) && !osName.contains("mac")) {
                 spec += cmprssptrs();
             }
         }
