@@ -81,7 +81,7 @@ public class JavaInfo {
             spec = spec.replace("arm-64", "aarch64");
             spec = spec.replace("riscv-64", "riscv64");
             spec = spec.replace("loongarch-64", "loongarch64");
-            if ((javaImplInfo.equals("ibm") || javaImplInfo.equals("openj9")) && !osName.contains("mac")) {
+            if (javaImplInfo.equals("ibm") || javaImplInfo.equals("openj9")) {
                 spec += cmprssptrs();
             }
         }
@@ -102,6 +102,12 @@ public class JavaInfo {
         CmdExecutor ce = CmdExecutor.getInstance();
         String exe = System.getProperty("java.home") + "/bin/java";
         String ver = "-version";
+		String osName = System.getProperty("os.name").toLowerCase();
+
+		// Skip compressed pointers check on macOS
+		if (osName.contains("mac")) {
+			return rt;
+		}
         String comp = ce.execute(new String[] {exe, "-XX:+UseCompressedOops", ver});
         String nocomp = ce.execute(new String[] {exe, "-XX:-UseCompressedOops", ver});
         if (!comp.contains(System.getProperty("java.version")) || !nocomp.contains(System.getProperty("java.version"))) {
