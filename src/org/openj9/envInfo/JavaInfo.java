@@ -103,11 +103,6 @@ public class JavaInfo {
         String exe = System.getProperty("java.home") + "/bin/java";
         String ver = "-version";
 		String osName = System.getProperty("os.name").toLowerCase();
-
-		// Skip compressed pointers check on macOS
-		if (osName.contains("mac")) {
-			return rt;
-		}
         String comp = ce.execute(new String[] {exe, "-XX:+UseCompressedOops", ver});
         String nocomp = ce.execute(new String[] {exe, "-XX:-UseCompressedOops", ver});
         if (!comp.contains(System.getProperty("java.version")) || !nocomp.contains(System.getProperty("java.version"))) {
