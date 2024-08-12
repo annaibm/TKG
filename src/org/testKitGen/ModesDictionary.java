@@ -79,6 +79,9 @@ public class ModesDictionary {
 
 	private void setSpec() {
 		String originalSpec = arg.getSpec();
+		if (originalSpec.equals("osx_aarch64_nocmprssptrs")) {
+			originalSpec = "osx_aarch64";
+		}
 		if (spec2platMap.containsKey(originalSpec)) {
 			spec = originalSpec;
 		} else {
