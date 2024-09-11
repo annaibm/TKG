@@ -26,7 +26,7 @@ use File::Path qw(make_path);
 my $path;
 # define task
 my $task = "default";
-my $dependencyList = "all";
+my $dependencyList = "";
 my $customUrl = "";
 my $curlOpts = "";
 
