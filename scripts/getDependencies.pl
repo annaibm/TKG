@@ -308,7 +308,10 @@ if ($task eq "clean") {
 				$url_custom .= '/' unless $url_custom =~ /\/$/;
 				$url_custom .= $jars_info[$i]{fname};
 			}
+			$url_custom .= '/' unless $url_custom =~ /\/$/;
+			$url_custom .= $jars_info[$i]{fname};
 			$url = "$url_custom";
+			
 			if (defined $shaurl && $shaurl ne '') {
 				$shaurl = "$customUrl/$shafn";
 			}
