@@ -149,10 +149,11 @@ def run_test():
 			skipped.add('test_not_arch_390_0')
 	else:
 		passed.add('test_not_arch_390_0')
+		passed.add('test_not_arch_390_z15plus_0')
 
 	if 'test_arch_390_z15_0' not in passed:
 		skipped.add('test_arch_390_z15_0')
-
+	
 	if 'test_arch_390_z14_0' not in passed:
 		skipped.add('test_arch_390_z14_0')
 
