@@ -304,8 +304,11 @@ if ($task eq "clean") {
 			if (defined $jars_info[$i]{is_system_test} && $jars_info[$i]{is_system_test} == 1) {
 				$url_custom =~ s/test.getDependency/systemtest.getDependency/;
 				$url_custom .= "systemtest_prereqs/";
-				$url_custom .= $jars_info[$i]{dir};
+				$url_custom .= "$dir";
 				$url_custom .= '/' unless $url_custom =~ /\/$/;
+			}
+			else{
+				$url_custom="https://openj9-jenkins.osuosl.org/job/test.getDependency/lastSuccessfulBuild/artifact/"
 			}
 
 			$url = "$url_custom/$jars_info[$i]{fname}";
