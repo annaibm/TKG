@@ -152,7 +152,7 @@ sub resultReporter {
 						# We have the Test results line
 						$testCasesPerTargetSummary = $result;
 						chomp($testCasesPerTargetSummary);
-						push (@testCasesResults, $result);					
+						push (@testCasesResults, $result);
 					} elsif ($result eq ($testName . "_PASSED\n")) {
 						$numOfPassed++;
 						$numOfTotal++;
@@ -211,7 +211,7 @@ sub resultReporter {
 							} elsif ($buildList =~ /jck/) {
 								my $testResult = "";
 								for my $i (0 .. $#lines) {
-									$lines[$i] =~ s/^\s+|\s+$//g; 
+									$lines[$i] =~ s/^\s+|\s+$//g;
 									if ( $lines[$i] =~ /(.*?)(\.html|#.*)(.*?)(Failed|Error\.)(.*?)/) {
 										# We have a jck testcase result line with Failed|Error in it
 										my @testsInfo = split(/\s+/, $lines[$i]);
@@ -223,7 +223,7 @@ sub resultReporter {
 										$testResult = $lines[$i];
 									}
 								}
-								$failureTests .= '        ' .$testResult . "\n"; 
+								$failureTests .= '        ' .$testResult . "\n";
 
 							}
 							if ( $failureTests eq "" ) {
@@ -235,7 +235,7 @@ sub resultReporter {
 								$tapString .= $jckFailedDuration ;
 							}
 						}
-						
+
 						if ($spec =~ /zos/) {
 							my $dmpDir = dirname($resultFile).'/'.$testName;
 							moveTDUMPS($output, $dmpDir, $spec);
@@ -276,6 +276,28 @@ sub resultReporter {
 						$numOfTotal++;
 						$tapString .= "ok " . $numOfTotal . " - " . $testName . " # skip\n";
 						$tapString .= "  ---\n";
+					} elsif ($result =~ /SPECjbb\S*_\d*_PASSED\b/) {
+						# Special handling for SPECjbb tests
+						# Check if there were exceptions in the output that indicate a failure
+						if ($output =~ /Exception in thread|java\.lang\.NullPointerException|java\.lang\.RuntimeException|Termination requested/) {
+							$numOfFailed++;
+							$numOfTotal++;
+							$tapString .= "not ok " . $numOfTotal . " - " . $testName .  "\n";
+							$tapString .= "  ---\n";
+							$tapString .= "    output:\n      |\n";
+							$tapString .= "        SPECjbb test failed due to exceptions in the output\n";
+							$tapString .= $output;
+							push (@failed, $testName . " - SPECjbb test failed due to exceptions in the output");
+						} else {
+							$numOfPassed++;
+							$numOfTotal++;
+							$tapString .= "ok " . $numOfTotal . " - " . $testName .  "\n";
+							$tapString .= "  ---\n";
+							push (@passed, $testName);
+							if ($diagnostic eq 'all') {
+								$tapString .= $output;
+							}
+						}
 					} elsif ($result =~ /(\(success rate: .*\))\n/) {
 						$successRate = $1;
 					}
@@ -318,16 +340,16 @@ sub resultReporter {
 	my $testTargetStatus = "TOTAL: $numOfTotal   EXECUTED: $numOfExecuted   PASSED: $numOfPassed   FAILED: $numOfFailed";
 	# Hide numOfDisabled when running disabled tests list.
 	if ($runningDisabled == 0) {
-		$testTargetStatus .= "   DISABLED: $numOfDisabled";   
+		$testTargetStatus .= "   DISABLED: $numOfDisabled";
 	}
 	$testTargetStatus .= "   SKIPPED: $numOfSkipped";
 	if ($comment ne "") {
 		$testTargetStatus = "($testTargetStatus)";
 	}
 	print "$testTargetStatus\n";
-	
+
 	print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
-	if (@testCasesResults && ($buildList =~ /openjdk/ || $buildList =~ /jck/)) { 
+	if (@testCasesResults && ($buildList =~ /openjdk/ || $buildList =~ /jck/)) {
 		$testCasesAllTargetsSummary = getTestcaseResults(\@testCasesResults);
 		print $testCasesAllTargetsSummary . "\n";
 		print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
@@ -342,7 +364,7 @@ sub resultReporter {
 			}
 			if (index($testTarget, "testList") != -1) {
     			$testTarget = 'testList';
-			} 
+			}
 			$tapName = "Test_openjdk$jdkVersion\_$jdkImpl\_$testTarget\_$platform.tap";
 		}
 		$tapFile = $tapPath.$tapName;
@@ -382,7 +404,7 @@ sub resultReporter {
 		if ( $testCasesAllTargetsSummary ) {
 			print $fhOut "# $testCasesAllTargetsSummary " . "\n";
 		}
-		
+
 		print $fhOut "1.." . $numOfTotal . "\n";
 		print $fhOut $tapString;
 		close $fhOut;
@@ -390,7 +412,7 @@ sub resultReporter {
 			print "ALL TESTS PASSED\n";
 		}
 	}
-	
+
 	if ($numOfFailed != 0) {
 		my $buildParam =  "";
 		if ($buildList ne '') {
@@ -438,7 +460,7 @@ sub getTestcaseResults() {
 	my $testCaseResults = '';
 	my @resultsArray = @{$_[0]};
 	my %testCasesSummary = ( 'passed: ' => 0, 'failed: ' => 0, 'error: ' => 0, 'skipped: ' => 0 );
-	
+
 	for my $result (@resultsArray) {
 		$result =~ s/Test results: //;
 		my @statusNumbers = split(";", $result);
@@ -451,13 +473,13 @@ sub getTestcaseResults() {
 					last;
 				}
 			}
-		}		
+		}
 	}
 
 	for (keys %testCasesSummary ) {
 		while ($testCasesSummary{$_} =~ s/^(\d+)(\d{3})/$1,$2/) {}
 	}
-	
+
 	$testCaseResults = "TESTCASES RESULTS SUMMARY: passed: " . $testCasesSummary{'passed: '} .  "; failed: " . $testCasesSummary{'failed: '} . "; error: " . $testCasesSummary{'error: '} . "; skipped: " . $testCasesSummary{'skipped: '};
 	return $testCaseResults;
 }
