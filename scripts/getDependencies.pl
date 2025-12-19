@@ -125,10 +125,26 @@ my %base = (
 		sha1 => 'bfcb96281ea3b59d626704f74bc6d625ff51cbce'
 	},
 	asmtools => {
-		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
+		# Deprecated: Use asmtools_7 or asmtools_9 instead
+		# This defaults to asmtools_7 for backward compatibility
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar',
 		fname => 'asmtools.jar',
-		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar.sha256sum.txt',
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar.sha256sum.txt',
 		shafn => 'asmtools.jar.sha256sum.txt',
+		shaalg => '256'
+	},
+	asmtools_7 => {
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar',
+		fname => 'asmtools-7.0.b09.jar',
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar.sha256sum.txt',
+		shafn => 'asmtools-7.0.b09.jar.sha256sum.txt',
+		shaalg => '256'
+	},
+	asmtools_9 => {
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
+		fname => 'asmtools-9.0.b14.jar',
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar.sha256sum.txt',
+		shafn => 'asmtools-9.0.b14.jar.sha256sum.txt',
 		shaalg => '256'
 	},
 	jaxb_api => {
@@ -419,6 +435,25 @@ if ($task eq "clean") {
 				}
 			} else {
 				print "Checksum verification skipped for $filename\n";
+			}
+		}
+
+		# Create symlink for asmtools version-specific files to asmtools.jar for backward compatibility
+		if ($fn =~ /^asmtools-.*\.jar$/) {
+			my $symlink_target = File::Spec->catfile($full_dir_path, 'asmtools.jar');
+			# Remove old symlink/file if it exists
+			if (-e $symlink_target || -l $symlink_target) {
+				unlink $symlink_target or warn "Could not remove old $symlink_target: $!\n";
+			}
+			# Create symlink (or copy on Windows)
+			if ($^O eq 'MSWin32') {
+				# Windows: use copy instead of symlink
+				copy($filename, $symlink_target) or warn "Could not copy $filename to $symlink_target: $!\n";
+				print "Created copy: $symlink_target -> $filename\n";
+			} else {
+				# Unix/Linux: use symlink
+				symlink($fn, $symlink_target) or warn "Could not create symlink $symlink_target -> $fn: $!\n";
+				print "Created symlink: $symlink_target -> $fn\n";
 			}
 		}
 	}

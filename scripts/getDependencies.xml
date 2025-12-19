@@ -84,6 +84,21 @@
 		<property name="LIB" value="${jtregTar}${openj9jtregtimeouthandler}"/>
 	</target>
 
+	<target name="getAsmtoolsVersion">
+		<if>
+			<!-- versions 8-17 use asmtools 7.0.b09 (Java 8 compatible, major version 52) -->
+			<matches pattern="^([89]|1[0-7])$" string="${JDK_VERSION}"/>
+			<then>
+				<property name="asmtoolsVersion" value="asmtools_7"/>
+			</then>
+			<else>
+				<!-- versions 18+ use asmtools 9.0.b14 (Java 21 compatible, major version 65) -->
+				<property name="asmtoolsVersion" value="asmtools_9"/>
+			</else>
+		</if>
+		<echo message="asmtools version used is : ${asmtoolsVersion}"/>
+	</target>
+
 	<target name="getJtreg" depends="getJtregVersion,getDependentLibs">
 		<mkdir dir="${DEST}"/>
 		<if>
@@ -117,9 +132,31 @@
 		</if>
 	</target>
 
-	<target name="getDependentLibs" unless="skipDependency">
-		<exec executable="perl" failonerror="true">
-			<arg line="${TEST_ROOT}/TKG/scripts/getDependencies.pl -path ${LIB_DIR} -task default -dependencyList ${LIB}"/>
-		</exec>
+	<target name="getDependentLibs" depends="getAsmtoolsVersion" unless="skipDependency">
+		<!-- If LIB contains 'all' or 'asmtools', replace 'asmtools' with the version-specific name -->
+		<if>
+			<or>
+				<equals arg1="${LIB}" arg2="all"/>
+				<contains string="${LIB}" substring="asmtools"/>
+			</or>
+			<then>
+				<var name="LIB_WITH_ASMTOOLS" value="${LIB}"/>
+				<!-- Replace 'asmtools' with version-specific asmtools -->
+				<propertyregex property="LIB_WITH_ASMTOOLS"
+					input="${LIB}"
+					regexp="asmtools"
+					replace="${asmtoolsVersion}"
+					defaultValue="${LIB}"
+					override="true"/>
+				<exec executable="perl" failonerror="true">
+					<arg line="${TEST_ROOT}/TKG/scripts/getDependencies.pl -path ${LIB_DIR} -task default -dependencyList ${LIB_WITH_ASMTOOLS}"/>
+				</exec>
+			</then>
+			<else>
+				<exec executable="perl" failonerror="true">
+					<arg line="${TEST_ROOT}/TKG/scripts/getDependencies.pl -path ${LIB_DIR} -task default -dependencyList ${LIB}"/>
+				</exec>
+			</else>
+		</if>
 	</target>
 </project>
