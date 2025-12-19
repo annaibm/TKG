@@ -130,20 +130,26 @@ my %base = (
 		# Using the old working version from Adoptium (major version 52, Java 8)
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
 		fname => 'asmtools.jar',
-		sha256 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
+		shafn => 'asmtools.jar.sha256sum.txt',
+		shaalg => '256'
 	},
 	asmtools_7 => {
 		# Java 8 compatible version (major version 52) for JDK 8-17
 		# Using the old working version from Adoptium
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
 		fname => 'asmtools-7.0.b10.jar',
-		sha256 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
+		shafn => 'asmtools-7.0.b10.jar.sha256sum.txt',
+		shaalg => '256'
 	},
 	asmtools_9 => {
 		# Java 21 compatible version (major version 65) for JDK 18+
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
 		fname => 'asmtools-9.0.b14.jar',
-		sha256 => '1247df725230dc03cb30ec622a9fd30555688708d342885314883f074e99d684'
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar.sha256sum.txt',
+		shafn => 'asmtools-9.0.b14.jar.sha256sum.txt',
+		shaalg => '256'
 	},
 	jaxb_api => {
 		url => 'https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar',
