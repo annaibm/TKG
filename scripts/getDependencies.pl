@@ -143,6 +143,8 @@ my %base = (
 		# Java 21 compatible version (major version 65) for JDK 18+
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
 		fname => 'asmtools-9.0.b14.jar'
+		shaalg => '256',
+    	sha1   => '48ffa6af544d0afd4e6ba68ab11e9eb5bd2fdd727fff7fe489a3a545c9182797'
 		# No SHA validation - Adoptium SHA files don't exist
 		# Actual SHA256: 48ffa6af544d0afd4e6ba68ab11e9eb5bd2fdd727fff7fe489a3a545c9182797
 	},
