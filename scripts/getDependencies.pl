@@ -127,22 +127,23 @@ my %base = (
 	asmtools => {
 		# Deprecated: Use asmtools_7 or asmtools_9 instead
 		# This defaults to asmtools_7 for backward compatibility with JDK 8-17
-		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/7.0-b09/asmtools-7.0-b09.jar',
+		# Using the old working version from Adoptium (major version 52, Java 8)
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
 		fname => 'asmtools.jar',
-		sha1 => '84e709cb8271e5e7ff7da61528d52d36298aa733'
+		sha256 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
 	},
 	asmtools_7 => {
 		# Java 8 compatible version (major version 52) for JDK 8-17
-		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/7.0-b09/asmtools-7.0-b09.jar',
-		fname => 'asmtools-7.0-b09.jar',
-		sha1 => '84e709cb8271e5e7ff7da61528d52d36298aa733'
+		# Using the old working version from Adoptium
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
+		fname => 'asmtools-7.0.b10.jar',
+		sha256 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
 	},
 	asmtools_9 => {
 		# Java 21 compatible version (major version 65) for JDK 18+
-		# Using Maven Central for reliable access
-		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/9.0-b14/asmtools-9.0-b14.jar',
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
 		fname => 'asmtools-9.0.b14.jar',
-		sha1 => 'e0565a5a28297f0a2abb047addc6748f6a7730c9'
+		sha256 => '1247df725230dc03cb30ec622a9fd30555688708d342885314883f074e99d684'
 	},
 	jaxb_api => {
 		url => 'https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar',
@@ -396,6 +397,22 @@ if ($task eq "clean") {
 
 		if ($expectedsha && $digest eq $expectedsha) {
 			print "$filename exists with correct hash, not downloading\n";
+			# File exists, but we still need to create/update symlink for asmtools
+			if ($fn =~ /^asmtools-.*\.jar$/) {
+				my $symlink_target = File::Spec->catfile($full_dir_path, 'asmtools.jar');
+				# Remove old symlink/file if it exists
+				if (-e $symlink_target || -l $symlink_target) {
+					unlink $symlink_target or warn "Could not remove old $symlink_target: $!\n";
+				}
+				# Create symlink (or copy on Windows)
+				if ($^O eq 'MSWin32') {
+					copy($filename, $symlink_target) or warn "Could not copy $filename to $symlink_target: $!\n";
+					print "Created copy: $symlink_target -> $filename\n";
+				} else {
+					symlink($fn, $symlink_target) or warn "Could not create symlink $symlink_target -> $fn: $!\n";
+					print "Created symlink: $symlink_target -> $fn\n";
+				}
+			}
 			next;
 		}
 
