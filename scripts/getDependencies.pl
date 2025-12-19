@@ -129,20 +129,20 @@ my %base = (
 		# This defaults to asmtools_7 for backward compatibility with JDK 8-17
 		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/7.0-b09/asmtools-7.0-b09.jar',
 		fname => 'asmtools.jar',
-		sha1 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
+		sha1 => '84e709cb8271e5e7ff7da61528d52d36298aa733'
 	},
 	asmtools_7 => {
 		# Java 8 compatible version (major version 52) for JDK 8-17
 		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/7.0-b09/asmtools-7.0-b09.jar',
 		fname => 'asmtools-7.0-b09.jar',
-		sha1 => 'd6771f4bce0dcae4e9a29527281e1ce65125edeb6dfa489548df710e4b249733'
+		sha1 => '84e709cb8271e5e7ff7da61528d52d36298aa733'
 	},
 	asmtools_9 => {
 		# Java 21 compatible version (major version 65) for JDK 18+
 		# Using Maven Central for reliable access
 		url => 'https://repo1.maven.org/maven2/org/openjdk/asmtools/asmtools/9.0-b14/asmtools-9.0-b14.jar',
 		fname => 'asmtools-9.0.b14.jar',
-		sha1 => '1247df725230dc03cb30ec622a9fd30555688708d342885314883f074e99d684'
+		sha1 => 'e0565a5a28297f0a2abb047addc6748f6a7730c9'
 	},
 	jaxb_api => {
 		url => 'https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar',
