@@ -124,10 +124,17 @@ my %base = (
 		fname => 'jcommander.jar',
 		sha1 => 'bfcb96281ea3b59d626704f74bc6d625ff51cbce'
 	},
-	asmtools => {
-		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
+	asmtools_7 => {
+	url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar',
+	fname => 'asmtools.jar',
+	shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b09-ea.jar.sha256sum.txt',
+	shafn => 'asmtools.jar.sha256sum.txt',
+	shaalg => '256'
+	},
+	asmtools_9 => {
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar',
 		fname => 'asmtools.jar',
-		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.0.b14-ea.jar.sha256sum.txt',
 		shafn => 'asmtools.jar.sha256sum.txt',
 		shaalg => '256'
 	},
@@ -284,6 +291,7 @@ my %system_jars = (
 	});
 
 my %jars_to_use;
+
 if ($path =~ /system_lib/ || (exists($ENV{"BUILD_TYPE"}) && $ENV{"BUILD_TYPE"} eq "systemtest")) {
 	print "System Test jars will be downloaded.\n";
 	%jars_to_use = %system_jars;
@@ -291,6 +299,24 @@ if ($path =~ /system_lib/ || (exists($ENV{"BUILD_TYPE"}) && $ENV{"BUILD_TYPE"} e
 	print "System Test jars will not be downloaded.\n";
 	%jars_to_use = %base;
 }
+
+# --- asmtools version selection ---
+if (exists $jars_to_use{asmtools_7} || exists $jars_to_use{asmtools_9}) {
+
+	my $jdk = $ENV{"JDK_VERSION"} // "";
+
+	if ($jdk ne "" && $jdk =~ /^(?:[89]|1[0-7])$/) {
+		print "Using asmtools 7.x for JDK $jdk\n";
+		$jars_to_use{asmtools} = $jars_to_use{asmtools_7};
+	} else {
+		print "Using asmtools 9.x for JDK $jdk\n";
+		$jars_to_use{asmtools} = $jars_to_use{asmtools_9};
+	}
+
+	delete $jars_to_use{asmtools_7};
+	delete $jars_to_use{asmtools_9};
+}
+
 my @dependencies = split(',', $dependencyList);
 # Put all dependent jars hash to array to prepare downloading
 my @jars_info;
