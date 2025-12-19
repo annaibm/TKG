@@ -480,8 +480,17 @@ sub getShaFromFile {
 	my $sha = "";
 	open my $fh, '<', $shafile or print "Can't open file $!";
 	my $content = do { local $/; <$fh> };
-	my @token = split / /, $content;
+	close $fh;
+
+	# Remove any whitespace/newlines
+	$content =~ s/^\s+|\s+$//g;
+
+	# Try to parse as "hash filename" format first
+	my @token = split /\s+/, $content;
 	if (@token > 1) {
+		$sha = $token[0];
+	} elsif (@token == 1 && $token[0] =~ /^[0-9a-fA-F]+$/) {
+		# Single token that looks like a hash
 		$sha = $token[0];
 	} else {
 		print "WARNING: cannot get the sha from $shafile.\nFile content: $content\n";
