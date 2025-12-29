@@ -126,9 +126,9 @@ my %base = (
 	},
 	asmtools => {
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.1.b01-ea.jar',
-		fname => 'asmtools.jar',
+		fname => 'asmtools-9.1.b01-ea.jar',
 		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.1.b01-ea.jar.sha256sum.txt',
-		shafn => 'asmtools.jar.sha256sum.txt',
+		shafn => 'asmtools-9.1.b01-ea.jar.sha256sum.txt',
 		shaalg => '256'
 	},
 	jaxb_api => {
