@@ -83,6 +83,33 @@
 		<var name="LIB" unset="true"/>
 		<property name="LIB" value="${jtregTar}${openj9jtregtimeouthandler}"/>
 	</target>
+	<target name="getAsmtoolsVersion">
+		<if>
+			<!-- versions 8-17 use asmtools 7 -->
+			<matches pattern="^([89]|1[0-7])$" string="${JDK_VERSION}"/>
+			<then>
+				<property name="asmtoolsJar" value="asmtools_7_0_b10_ea"/>
+			</then>
+			<else>
+				<!-- versions 18+ use asmtools 9 -->
+				<property name="asmtoolsJar" value="asmtools_9_1_b01_ea"/>
+			</else>
+		</if>
+		<echo message="asmtools version used is : ${asmtoolsJar}"/>
+		<var name="LIB" unset="true"/>
+		<property name="LIB" value="${asmtoolsJar}"/>
+	</target>
+
+	<target name="getAsmtools" depends="getAsmtoolsVersion,getDependentLibs">
+		<mkdir dir="${DEST}"/>
+		<if>
+			<available file="${LIB_DIR}/${asmtoolsJar}.jar"/>
+			<then>
+				<copy file="${LIB_DIR}/${asmtoolsJar}.jar" todir="${DEST}"/>
+			</then>
+		</if>
+	</target>
+
 
 	<target name="getJtreg" depends="getJtregVersion,getDependentLibs">
 		<mkdir dir="${DEST}"/>
@@ -117,7 +144,7 @@
 		</if>
 	</target>
 
-	<target name="getDependentLibs" unless="skipDependency">
+	<target name="getDependentLibs" depends="getAsmtoolsVersion" unless="skipDependency">
 		<exec executable="perl" failonerror="true">
 			<arg line="${TEST_ROOT}/TKG/scripts/getDependencies.pl -path ${LIB_DIR} -task default -dependencyList ${LIB}"/>
 		</exec>
