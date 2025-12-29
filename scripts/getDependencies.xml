@@ -101,11 +101,10 @@
 	</target>
 
 	<target name="getAsmtools" depends="getAsmtoolsVersion,getDependentLibs">
-		<mkdir dir="${DEST}"/>
 		<if>
 			<available file="${LIB_DIR}/${asmtoolsJar}.jar"/>
 			<then>
-				<copy file="${LIB_DIR}/${asmtoolsJar}.jar" todir="${DEST}"/>
+				<copy file="${LIB_DIR}/${asmtoolsJar}.jar" tofile="${LIB_DIR}/asmtools.jar" overwrite="true"/>
 			</then>
 		</if>
 	</target>
