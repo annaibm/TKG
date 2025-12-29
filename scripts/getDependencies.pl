@@ -124,7 +124,14 @@ my %base = (
 		fname => 'jcommander.jar',
 		sha1 => 'bfcb96281ea3b59d626704f74bc6d625ff51cbce'
 	},
-	asmtools => {
+    asmtools_7_0_b10_ea => {
+		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
+		fname => 'asmtools-core-7.0.b10-ea.jar'
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
+		shafn => 'asmtools.jar.sha256sum.txt',
+		shaalg => '256'
+	},
+	asmtools_9_1_b01_ea => {
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.1.b01-ea.jar',
 		fname => 'asmtools-9.1.b01-ea.jar',
 		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-9.1.b01-ea.jar.sha256sum.txt',
