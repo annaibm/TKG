@@ -126,7 +126,7 @@ my %base = (
 	},
     asmtools_7_0_b10_ea => {
 		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
-		fname => 'asmtools-core-7.0.b10-ea.jar'
+		fname => 'asmtools-core-7.0.b10-ea.jar',
 		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
 		shafn => 'asmtools.jar.sha256sum.txt',
 		shaalg => '256'
