@@ -100,11 +100,12 @@
 		<property name="LIB" value="${asmtoolsJar}"/>
 	</target>
 
-	<target name="getAsmtools" depends="getAsmtoolsVersion,getDependentLibs">
+	<target name="copyAsmtoolsAlias" if="asmtoolsJar">
 		<if>
 			<available file="${LIB_DIR}/${asmtoolsJar}.jar"/>
 			<then>
 				<copy file="${LIB_DIR}/${asmtoolsJar}.jar" tofile="${LIB_DIR}/asmtools.jar" overwrite="true"/>
+				<echo message="Copied ${asmtoolsJar}.jar to asmtools.jar"/>
 			</then>
 		</if>
 	</target>
@@ -147,5 +148,6 @@
 		<exec executable="perl" failonerror="true">
 			<arg line="${TEST_ROOT}/TKG/scripts/getDependencies.pl -path ${LIB_DIR} -task default -dependencyList ${LIB}"/>
 		</exec>
+		<antcall target="copyAsmtoolsAlias"/>
 	</target>
 </project>
