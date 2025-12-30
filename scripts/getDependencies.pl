@@ -131,13 +131,6 @@ my %base = (
 		shafn => 'asmtools.jar.sha256sum.txt',
 		shaalg => '256'
 	},
-	asmtools9 => {
-		url    => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-9.0.jar',
-		fname  => 'asmtools.jar',
-		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-9.0.jar.sha256sum.txt',
-		shafn  => 'asmtools-core-9.0.jar.sha256sum.txt',
-		shaalg => '256'
-	},
 	jaxb_api => {
 		url => 'https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar',
 		fname => 'jaxb-api.jar',
