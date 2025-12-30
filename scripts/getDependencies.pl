@@ -452,11 +452,29 @@ sub toolsJarDownloader {
 sub getShaFromFile {
 	my ( $shafile, $fn ) = @_;
 	my $sha = "";
-	open my $fh, '<', $shafile or print "Can't open file $!";
+	open my $fh, '<', $shafile or do {
+		print "WARNING: Can't open SHA file $shafile: $!\n";
+		return $sha;
+	};
 	my $content = do { local $/; <$fh> };
-	my @token = split / /, $content;
-	if (@token > 1) {
+	close $fh;
+
+	# Remove leading/trailing whitespace and newlines
+	$content =~ s/^\s+|\s+$//g;
+
+	# Try different SHA file formats:
+	# Format 1: "SHA  FILENAME" (two spaces)
+	# Format 2: "SHA FILENAME" (one space)
+	# Format 3: "SHA" (just the hash)
+	my @token = split /\s+/, $content;
+	if (@token >= 1) {
+		# First token should be the SHA hash
 		$sha = $token[0];
+		# Validate it looks like a hex hash (at least 40 chars for SHA1, 64 for SHA256)
+		if ($sha !~ /^[0-9a-fA-F]{40,}$/) {
+			print "WARNING: Invalid SHA format in $shafile.\nFile content: $content\n";
+			$sha = "";
+		}
 	} else {
 		print "WARNING: cannot get the sha from $shafile.\nFile content: $content\n";
 	}
