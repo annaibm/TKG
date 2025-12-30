@@ -125,10 +125,17 @@ my %base = (
 		sha1 => 'bfcb96281ea3b59d626704f74bc6d625ff51cbce'
 	},
 	asmtools => {
-		url => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
-		fname => 'asmtools.jar',
+		url    => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar',
+		fname  => 'asmtools-core-7.0.b10-ea.jar',
 		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
-		shafn => 'asmtools.jar.sha256sum.txt',
+		shafn  => 'asmtools-core-7.0.b10-ea.jar.sha256sum.txt',
+		shaalg => '256'
+	},
+	asmtools9 => {
+		url    => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-9.0.jar',
+		fname  => 'asmtools-core-9.0.jar',
+		shaurl => 'https://ci.adoptium.net/job/dependency_pipeline/lastSuccessfulBuild/artifact/asmtools/asmtools-core-9.0.jar.sha256sum.txt',
+		shafn  => 'asmtools-core-9.0.jar.sha256sum.txt',
 		shaalg => '256'
 	},
 	jaxb_api => {
@@ -367,16 +374,16 @@ if ($task eq "clean") {
 		if (!$expectedsha) {
 			if (defined $shafn && $shafn ne '') {
 				$shafn = $path . $sep . $shafn;
-				# if the sha file exists, parse the file and get the expected sha
-				if (-e $shafn) {
-					$expectedsha = getShaFromFile($shafn, $fn);
-				}
 			}
 
-			# if expectedsha is not set above and shaurl is provided, download the sha file
-			# and parse the file to get the expected sha
-			if (!$expectedsha && $shaurl) {
+			# If shaurl is provided, always download fresh SHA to ensure we have the latest
+			# This prevents stale cached SHA files from validating wrong content
+			if ($shaurl) {
+				print "Fetching latest SHA from $shaurl\n";
 				downloadFile($shaurl, $shafn);
+				$expectedsha = getShaFromFile($shafn, $fn);
+			} elsif (defined $shafn && $shafn ne '' && -e $shafn) {
+				# Only use cached SHA file if no shaurl is provided (static dependencies)
 				$expectedsha = getShaFromFile($shafn, $fn);
 			}
 		}
@@ -384,6 +391,15 @@ if ($task eq "clean") {
 		if ($expectedsha && $digest eq $expectedsha) {
 			print "$filename exists with correct hash, not downloading\n";
 			next;
+		} elsif ($expectedsha && $digest ne $expectedsha) {
+			# SHA mismatch detected - file is stale or corrupted
+			print "WARNING: $filename has incorrect hash (expected: $expectedsha, actual: $digest)\n";
+			print "Deleting stale file and forcing re-download...\n";
+			if (-e $filename) {
+				unlink $filename or warn "Could not delete $filename: $!\n";
+			}
+			# Clear digest so download proceeds
+			$digest = "";
 		}
 
 		my $ignoreChecksum = (!defined $sha1 || $sha1 eq '') && (!defined $shaurl || $shaurl eq '');
