@@ -100,7 +100,8 @@ endif
 # compile tools
 #######################################
 include moveDmp.mk
-COMPILE_TOOLS_CMD=ant -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
+# Use -lib flag to load ant-contrib from system Ant installation (supports multiple Ant versions)
+COMPILE_TOOLS_CMD=ant -lib /usr/local/apache-ant-*/lib -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
 
 compileTools:
 	$(RM) -r $(COMPILATION_OUTPUT); \
