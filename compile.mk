@@ -39,7 +39,7 @@ else
 TEST_FLAG_PARAM :=
 endif
 
-COMPILE_CMD=ant -lib "$(ls -d /usr/local/apache-ant-*/lib | tail -1)" -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
+COMPILE_CMD=ant -lib "$(dirname $(shell find /usr/local -name ant-contrib.jar 2>/dev/null | head -1))" -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
 
 
 compile:

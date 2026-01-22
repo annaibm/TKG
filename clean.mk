@@ -28,6 +28,6 @@ cleanBuild:
 clean: cleanBuild
 	$(RM) -r $(Q)$(TEST_ROOT)$(Q)$(D)TKG$(D)output_*
 	$(RM) $(FAILEDTARGETS)
-	ant -lib "$(ls -d /usr/local/apache-ant-*/lib | tail -1)" -f $(Q)$(TEST_ROOT)$(Q)$(D)TKG$(D)scripts/build_tools.xml clean
+	ant -lib "$(dirname $(shell find /usr/local -name ant-contrib.jar 2>/dev/null | head -1))" -f $(Q)$(TEST_ROOT)$(Q)$(D)TKG$(D)scripts/build_tools.xml clean
 
 .PHONY: cleanBuild clean
