@@ -39,8 +39,8 @@ else
 TEST_FLAG_PARAM :=
 endif
 # Use -lib flag to load ant-contrib from system Ant installation (supports multiple Ant versions)
-# Wildcard pattern works across RHEL9 (1.10.5), SLES15 (1.10.15), and Ubuntu24 (1.10.15)
-COMPILE_CMD=ant -lib /usr/local/apache-ant-*/lib -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
+# Shell expansion finds the correct Ant lib directory across RHEL9 (1.10.5), SLES15 (1.10.15), and Ubuntu24 (1.10.15)
+COMPILE_CMD=ant -lib $$(echo /usr/local/apache-ant-*/lib) -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
 
 
 compile:
@@ -52,6 +52,6 @@ compile:
 	@$(ECHO_NEWLINE)
 	@$(ECHO) $(Q)RECORD TEST REPOs SHA $(Q)
 	$(CD) $(Q)$(TEST_ROOT)$(D)TKG$(D)scripts$(Q); \
-	bash $(Q)getSHAs.sh$(Q) --test_root_dir $(Q)$(TEST_ROOT)$(Q) --shas_file $(Q)$(TEST_ROOT)$(D)TKG$(D)SHAs.txt$(Q) 
+	bash $(Q)getSHAs.sh$(Q) --test_root_dir $(Q)$(TEST_ROOT)$(Q) --shas_file $(Q)$(TEST_ROOT)$(D)TKG$(D)SHAs.txt$(Q)
 
 .PHONY: compile

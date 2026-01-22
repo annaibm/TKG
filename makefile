@@ -101,7 +101,8 @@ endif
 #######################################
 include moveDmp.mk
 # Use -lib flag to load ant-contrib from system Ant installation (supports multiple Ant versions)
-COMPILE_TOOLS_CMD=ant -lib /usr/local/apache-ant-*/lib -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
+# Shell expansion finds the correct Ant lib directory across RHEL9 (1.10.5), SLES15 (1.10.15), and Ubuntu24 (1.10.15)
+COMPILE_TOOLS_CMD=ant -lib $$(echo /usr/local/apache-ant-*/lib) -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
 
 compileTools:
 	$(RM) -r $(COMPILATION_OUTPUT); \
