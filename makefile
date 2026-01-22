@@ -100,7 +100,7 @@ endif
 # compile tools
 #######################################
 include moveDmp.mk
-COMPILE_TOOLS_CMD=ant -lib $(shell dirname $$(find /usr/local -name ant-contrib.jar 2>/dev/null | head -1)) -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
+COMPILE_TOOLS_CMD=ant -lib $(shell find /usr/local -name 'ant-contrib*.jar' 2>/dev/null | head -1) -f .$(D)scripts$(D)build_tools.xml $(Q)-DTEST_JDK_HOME=$(TEST_JDK_HOME)$(Q) $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q)
 
 compileTools:
 	$(RM) -r $(COMPILATION_OUTPUT); \
