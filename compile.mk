@@ -38,7 +38,9 @@ TEST_FLAG_PARAM := -DTEST_FLAG=$(TEST_FLAG)
 else
 TEST_FLAG_PARAM :=
 endif
-COMPILE_CMD=ant -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
+# Use -lib flag to load ant-contrib from system Ant installation (supports multiple Ant versions)
+# Wildcard pattern works across RHEL9 (1.10.5), SLES15 (1.10.15), and Ubuntu24 (1.10.15)
+COMPILE_CMD=ant -lib /usr/local/apache-ant-*/lib -f scripts$(D)build_test.xml $(Q)-DTEST_ROOT=$(TEST_ROOT)$(Q) $(Q)-DBUILD_ROOT=$(BUILD_ROOT)$(Q) $(Q)-DJDK_VERSION=$(JDK_VERSION)$(Q) $(Q)-DJDK_IMPL=$(JDK_IMPL)$(Q) $(Q)-DJDK_VENDOR=$(JDK_VENDOR)$(Q) $(Q)-DJCL_VERSION=$(JCL_VERSION)$(Q) $(Q)-DBUILD_LIST=${COMPILE_BUILD_LIST}$(Q) $(Q)-DRESOURCES_DIR=${RESOURCES_DIR}$(Q) $(Q)-DSPEC=${SPEC}$(Q) $(Q)-DTEST_JDK_HOME=${TEST_JDK_HOME}$(Q) $(Q)-DJVM_VERSION=$(JVM_VERSION)$(Q) $(Q)-DLIB_DIR=$(LIB_DIR)$(Q) ${TEST_FLAG_PARAM}
 
 
 compile:
