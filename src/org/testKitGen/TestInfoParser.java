@@ -89,7 +89,7 @@ public class TestInfoParser {
 		}
 		Set<String> testFlags = new HashSet<>(arg.getTestFlag());
 		boolean requiredFeatureFound = false;
-		boolean hasRequiredFeature = false; 
+		boolean hasRequiredFeature = false;
 		for (Map.Entry<String,String> entry : ti.getFeatures().entrySet()) {
 			String featureOpt = entry.getValue().toLowerCase();
 			if (featureOpt.equals("required")) {
@@ -468,6 +468,20 @@ public class TestInfoParser {
 				return false;
 			}
 			return compareVersion(osVersion, osLabelArg[1]);
+		} else if (prSplitOnDot[0].equals("os") && (prSplitOnDot.length == 3)) {
+			// Handle os.osname.version format for non-Linux systems (e.g., os.aix.7_1)
+			// where osLabel is not set
+			String osName = prSplitOnDot[1];
+			String osVersion = prSplitOnDot[2];
+			// Check if the spec contains the OS name
+			if (!fullSpec.contains(osName)) {
+				return false;
+			}
+			// For non-Linux systems, we can't verify the version since osLabel is empty
+			// So we just check if the OS name matches and return true
+			// This means os.aix.7_1 will match any AIX system
+			// TODO: Implement proper version checking for non-Linux systems
+			return true;
 		}
 		return true;
 	}
