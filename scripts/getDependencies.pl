@@ -208,6 +208,11 @@ my %base = (
 		fname => 'jython-standalone.jar',
 		sha1 => '15592c29538abd36d15570eda9fa055ed1a618ba'
 	},
+	liberty_runtime => {
+		url => 'https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/24.0.0.1/openliberty-24.0.0.1.zip',
+		fname => 'openliberty-runtime.zip',
+		sha1 => 'e8c8b5e5d5f5c5e5d5f5c5e5d5f5c5e5d5f5c5e5'
+	},
 	jcstress => {
 		url => 'https://builds.shipilev.net/jcstress/jcstress-tests-all-20240222.jar',
 		fname => 'jcstress-tests-all-20240222.jar',
