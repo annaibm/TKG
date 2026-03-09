@@ -435,7 +435,7 @@ if ($task eq "clean") {
 
 				if ($digest eq $expectedsha_check) {
 					$sha_verified = 1;
-					print "SHA verification passed for $filename\n" if $verbose;
+					print "SHA verification passed for $filename\n";
 				} elsif ($has_testDependency_url) {
 					print "Warning: SHA mismatch for $filename from custom URL\n";
 					print "Expected: $expectedsha_check, Got: $digest\n";
