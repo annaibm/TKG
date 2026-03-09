@@ -410,7 +410,7 @@ if ($task eq "clean") {
 		}
 		my $download_success = 0;
 		my $sha_verified = 0;
-		my $tried_custom_url = ($url_custom ne "" && $url ne $third_party_url);
+		my $has_testDependency_url = ($url_custom ne "" && $url ne $third_party_url);
 
 		# Try download from URL (custom or third-party)
 		eval {
@@ -435,7 +435,8 @@ if ($task eq "clean") {
 
 				if ($digest eq $expectedsha_check) {
 					$sha_verified = 1;
-				} elsif ($tried_custom_url) {
+					print "SHA verification passed for $filename\n" if $verbose;
+				} elsif ($has_testDependency_url) {
 					print "Warning: SHA mismatch for $filename from custom URL\n";
 					print "Expected: $expectedsha_check, Got: $digest\n";
 					print "Falling back to third-party URL: $third_party_url\n";
@@ -447,9 +448,11 @@ if ($task eq "clean") {
 
 		# Fall back to third-party URL if custom URL failed or had SHA mismatch
 		if (!$download_success) {
-			if (!$tried_custom_url) {
-				print "Error: Failed to download $filename from URL $url\n";
-				exit 1;
+			if ($has_testDependency_url) {
+				print "Warning: Download failed for $filename from testDependency URL $url\n";
+				print "Falling back to third-party URL: $third_party_url\n";
+			} else {
+				print "Attempting to download $filename from third-party URL: $third_party_url\n";
 			}
 			eval {
 				downloadFile($third_party_url, $filename);
@@ -459,10 +462,12 @@ if ($task eq "clean") {
 				print "Error: Failed to download $filename from third-party URL $third_party_url\n";
 				exit 1;
 			}
-			$sha_verified = 0;  # Need to verify SHA again for third-party download
+			$sha_verified = 0;  # Reset flag - must verify SHA for third-party download
 		}
 
 		# Verify SHA for third-party download or if not yet verified
+		# If shaurl is provided, download the sha file to get the expected checksum
+		# as the dependent third party jar may have been newly downloaded
 		if (!$ignoreChecksum && !$sha_verified) {
 			if ($shaurl) {
 				downloadFile($shaurl, $shafn);
