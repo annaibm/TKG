@@ -70,12 +70,28 @@
 	</macrodef>
 
 	<target name="-expand-build-list" if="build.list.needs.expansion">
-		<exec executable="perl" outputproperty="build.list.expanded" failonerror="true">
+		<condition property="is.zos">
+			<equals arg1="${os.name}" arg2="z/OS"/>
+		</condition>
+		
+		<!-- z/OS: use loadresource (Ant handles charset correctly) -->
+		<loadresource property="build.list.expanded" if:set="is.zos">
+			<string value="${BUILD_LIST}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="([^,]+)" replace="\1/build.xml" flags="g"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<property name="build.list" value="TestConfig/build.xml,${build.list.expanded}" if:set="is.zos"/>
+		
+		<!-- Non-z/OS: use perl -->
+		<exec executable="perl" outputproperty="build.list.expanded" failonerror="true" unless:set="is.zos">
 			<arg value="-e"/>
 			<arg value="my $b = $ENV{BUILD_LIST}; $b =~ s/([^,]+)/$1\/build.xml/g; print 'TestConfig/build.xml,' . $b;"/>
 			<env key="BUILD_LIST" value="${BUILD_LIST}"/>
 		</exec>
-		<property name="build.list" value="${build.list.expanded}"/>
+		<property name="build.list" value="${build.list.expanded}" unless:set="is.zos"/>
 		<echo>build.list=${build.list}</echo>
 	</target>
 
