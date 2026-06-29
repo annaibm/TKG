@@ -70,7 +70,7 @@
 	</macrodef>
 
 	<target name="-expand-build-list" if="build.list.needs.expansion">
-        <groovy>
+        <groovy><![CDATA[
             def buildList = System.getenv('BUILD_LIST')
             if (buildList != null && !buildList.isEmpty()) {
                 def parts = buildList.split(',')
@@ -79,7 +79,7 @@
             } else {
                 project.setProperty('build.list.expanded', 'TestConfig/build.xml')
             }
-        </groovy>
+        ]]></groovy>
         <property name="build.list" value="${build.list.expanded}"/>
         <echo>build.list=${build.list}</echo>
     </target>
