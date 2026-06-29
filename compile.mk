@@ -27,7 +27,7 @@ include moveDmp.mk
 #######################################
 # compile all tests under $(TEST_ROOT)
 #######################################
-COMPILE_BUILD_LIST = ${BUILD_LIST}
+COMPILE_BUILD_LIST = ${REFINED_BUILD_LIST}
 # Pre-expand BUILD_LIST to avoid charset issues on z/OS
 EXPANDED_BUILD_LIST = TestConfig/build.xml,$(subst ,/build.xml,${COMPILE_BUILD_LIST})/build.xml
 
