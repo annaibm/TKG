@@ -17,7 +17,7 @@
 <project name="Compile Java Test Projects" basedir="." default="build"
 	xmlns:if="ant:if"
 	xmlns:unless="ant:unless">
-
+    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy"/>
 	<description>Compile Java Test Projects</description>
 
 	<property name="ascii.workspace.dir" value="${TEST_ROOT}" />
@@ -70,17 +70,19 @@
 	</macrodef>
 
 	<target name="-expand-build-list" if="build.list.needs.expansion">
-		<groovy>
-			def buildList = System.getenv('BUILD_LIST')
-			if (buildList != null &amp;&amp; !buildList.isEmpty()) {
-				def parts = buildList.split(',')
-				def expanded = parts.collect { it + '/build.xml' }.join(',')
-				project.setProperty('build.list.expanded', 'TestConfig/build.xml,' + expanded)
-			}
-		</groovy>
-		<property name="build.list" value="${build.list.expanded}"/>
-		<echo>build.list=${build.list}</echo>
-	</target>
+        <groovy>
+            def buildList = System.getenv('BUILD_LIST')
+            if (buildList != null && !buildList.isEmpty()) {
+                def parts = buildList.split(',')
+                def expanded = parts.collect { it + '/build.xml' }.join(',')
+                project.setProperty('build.list.expanded', 'TestConfig/build.xml,' + expanded)
+            } else {
+                project.setProperty('build.list.expanded', 'TestConfig/build.xml')
+            }
+        </groovy>
+        <property name="build.list" value="${build.list.expanded}"/>
+        <echo>build.list=${build.list}</echo>
+    </target>
 
 	<target name="build" depends="-expand-build-list,stage_test_material" description="using ${JDK_VERSION} to compile the source ">
 		<subant target="">
