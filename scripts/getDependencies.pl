@@ -824,6 +824,11 @@ if ($task eq "clean") {
 				exit 1;
 			}
 			$sha_verified = 0;  # Reset flag - must verify SHA for third-party download
+			# After falling back to the third-party URL, discard any testDependency-derived
+			# shaurl so we use the hardcoded expectedsha from the entry definition instead.
+			$shaurl = $jars_info[$i]{shaurl};
+			$shafn  = $jars_info[$i]{shafn};
+			$expectedsha = $jars_info[$i]{sha256} // $jars_info[$i]{sha1};
 		}
 
 		# If shaurl is provided, download the sha file to get the expected checksum
