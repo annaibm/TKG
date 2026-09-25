@@ -37,6 +37,40 @@ GetOptions ("path=s" => \$path,
 			"curlOpts=s" => \$curlOpts)
 	or die("Error in command line arguments\n");
 
+# On z/OS, curl has no system trust store for modern CA roots (e.g. Let's Encrypt).
+# Append --cacert automatically when it has not already been supplied, using the first
+# available bundle found via CURL_CA_BUNDLE or a list of known per-node locations.
+# Candidate paths cover: z/Fyre nodes, stlab94/95 (Rocket),
+# stlab6e/6f, and stlab98 (zopen pki tree).
+if ($curlOpts !~ /--cacert/) {
+	my $cacert = '';
+	if (defined($ENV{'CURL_CA_BUNDLE'}) && $ENV{'CURL_CA_BUNDLE'} ne '') {
+		$cacert = $ENV{'CURL_CA_BUNDLE'};
+	} else {
+		my @candidates = (
+			"$ENV{'HOME'}/certs/cacert.pem",
+			'/rocket/miniconda/ssl/cacert.pem',
+			'/usr/lpp/rsusr/miniconda/ssl/cacert.pem',
+			'/u/home/JENKINS/openj9_resources/zopen/etc/pki/tls/certs/cacert.pem',
+			'/jenkins/openj9_resources/zopen/etc/pki/tls/certs/cacert.pem',
+		);
+		for my $c (@candidates) {
+			if (-f $c) {
+				$cacert = $c;
+				last;
+			}
+		}
+	}
+	if ($cacert ne '') {
+		$curlOpts .= " --cacert $cacert";
+	}
+}
+
+# Allow overriding the curl binary path per-node (e.g. z/OS nodes where curl
+# isn't on the default PATH). Defaults to "curl" so behavior is unchanged
+# on every other platform.
+my $curlBin = $ENV{'CURL_BIN'} // 'curl';
+
 if (not defined $path) {
 	die "ERROR: Download path not defined!\n"
 }
@@ -236,12 +270,6 @@ my %base = (
 		url => 'https://repo1.maven.org/maven2/com/ibm/icu/icu4j-localespi/61.1/icu4j-localespi-61.1.jar',
 		fname => 'icu4j-localespi-61_1.jar',
 		sha256 => '99691e7562bcb211fc247ea27d4abf94486c5f373907da71a17bb358d97829b1',
-		shaalg => '256'
-	},
-	unicode_gb18030_2022 => {
-		url => 'https://www.unicode.org/Public/mappings/iso10646/GB18030-2022.txt',
-		fname => 'GB18030-2022.txt',
-		sha256 => '80c3fe2ae1062abf56456f52518bd670f9ec3917b7f85e152b347ac6b6faf880',
 		shaalg => '256'
 	},
 	unicode_unihan_17_0_0 => {
@@ -610,7 +638,7 @@ my %system_jars = (
 		url => 'https://download.sysinternals.com/files/SysinternalsSuite.zip',
 		dir => 'windows_sysinternals',
 		fname => 'windows_sysinternals.zip',
-		sha256 => 'e1c73a31b575c9cb216a94484a5b162bd585deb8bd1a8775c8103ced39cc67ce',
+		sha256 => 'ec1c22581518e5a8661ec26886bc2eaefe9e59cf2ad7fba41926c19d356de169',
 		shaalg => '256',
 		is_system_test => 1
 	},
@@ -758,7 +786,7 @@ if ($task eq "clean") {
 				if (-e $shafn) {
 					$expectedsha = getShaFromFile($shafn, $fn);
 				} elsif ($shaurl) {
-					downloadFile($shaurl, $shafn);
+					downloadFile($shaurl, $shafn, 'ISO8859-1');  # checksum files are read back as text
 					$expectedsha = getShaFromFile($shafn, $fn);
 				}
 			}
@@ -791,7 +819,7 @@ if ($task eq "clean") {
 			my $expectedsha_check = $expectedsha;
 			if (!$expectedsha_check && $shaurl) {
 				eval {
-					downloadFile($shaurl, $shafn);
+					downloadFile($shaurl, $shafn, 'ISO8859-1');  # checksum files are read back as text
 					$expectedsha_check = getShaFromFile($shafn, $fn);
 				};
 			}
@@ -830,7 +858,7 @@ if ($task eq "clean") {
 		# as the dependent third party jar may have been newly downloaded
 		if (!$ignoreChecksum && !$sha_verified) {
 			if ($shaurl) {
-				downloadFile($shaurl, $shafn);
+				downloadFile($shaurl, $shafn, 'ISO8859-1');  # checksum files are read back as text
 				$expectedsha = getShaFromFile($shafn, $fn);
 			}
 
@@ -864,7 +892,7 @@ sub toolsJarDownloader {
 	my ( $dir, $url ) = @_;
 	print "Checksum verification skipped for systemtest_prereqs/tools/tools.jar \n";
 	print "downloading $url \n";
-	qx{_ENCODE_FILE_NEW=BINARY curl -LfsS --create-dirs -o "$dir/jdk8/jdk8.tar.gz" $url 2>&1};
+	qx{_ENCODE_FILE_NEW=BINARY $curlBin -LfsS --create-dirs -o "$dir/jdk8/jdk8.tar.gz" $url 2>&1};
 	qx{tar --directory "$dir/jdk8" -xzf "$dir/jdk8/jdk8.tar.gz" --strip-components 1};
 	qx{cp "$dir/jdk8/lib/tools.jar" "$dir"};
 	qx{rm -rf "$dir/jdk8"};
@@ -885,8 +913,13 @@ sub getShaFromFile {
 	return $sha;
 }
 
+# downloadFile($url, $filename [, $encoding])
+#   $encoding - optional z/OS file tag for the new file (value of _ENCODE_FILE_NEW,
+#               which is ignored on other platforms). Only checksum files, which are
+#               read back as text by getShaFromFile, should pass 'ISO8859-1'.
+#               If omitted, .jar files are tagged BINARY and everything else UNTAGGED.
 sub downloadFile {
-	my ( $url, $filename ) = @_;
+	my ( $url, $filename, $encoding ) = @_;
 	print "downloading $url\n";
 	my $output;
 
@@ -895,21 +928,27 @@ sub downloadFile {
 		qx(rm $filename);
 	}
 
+	# Data files (including .txt data such as the Unicode UCD files) must not be tagged
+	# as text on z/OS: with _BPXK_AUTOCVT=ON, Perl reads a file tagged ISO8859-1 as
+	# converted EBCDIC, so Digest::SHA hashes converted bytes and the SHA check fails.
+	# Writing them untagged keeps the bytes that are hashed identical to the bytes downloaded.
+	my $tag = $encoding;
+	if (!defined $tag || $tag eq '') {
+		$tag = ('.jar' eq substr $filename, -length('.jar')) ? 'BINARY' : 'UNTAGGED';
+	}
+
 	my $returnCode = 99;
 	my $download_attempts = 0;
 	while ($returnCode != 0 && $download_attempts < 10) {
 		$download_attempts++;
 		print "download attempt $download_attempts for $url\n";
-		# .txt SHA files are in ISO8859-1
-		# note _ENCODE_FILE_NEW flag is set for zos
-		if ('.txt' eq substr $filename, -length('.txt')) {
-			$output = qx{_ENCODE_FILE_NEW=ISO8859-1 curl $curlOpts -o $filename $url 2>&1};
-		} elsif ('.jar' eq substr $filename, -length('.jar')) {
-			$output = qx{_ENCODE_FILE_NEW=BINARY curl $curlOpts -o $filename $url 2>&1};
-		} else {
-			$output = qx{_ENCODE_FILE_NEW=UNTAGGED curl $curlOpts -o $filename $url 2>&1};
-		}
+		# --fail makes curl exit non-zero on HTTP errors (4xx/5xx) so an error page is
+		# never saved as a dependency and misdiagnosed as a SHA mismatch.
+		$output = qx{_ENCODE_FILE_NEW=$tag $curlBin $curlOpts --fail -o $filename $url 2>&1};
 		$returnCode = $?;
+		if ($returnCode != 0) {
+			print "WARNING: download attempt $download_attempts failed for $url (curl exit code: " . ($returnCode >> 8) . ")\n";
+		}
 		last if $returnCode == 0;
 	}
 
@@ -922,6 +961,6 @@ sub downloadFile {
 		if (-e $filename) {
 			unlink $filename or die "Can't delete '$filename': $!\n";
 		}
-		die "ERROR: downloading $url failed, return code: $returnCode\n";
+		die "ERROR: downloading $url failed after $download_attempts attempt(s), curl exit code: " . ($returnCode >> 8) . "\n";
 	}
 }
